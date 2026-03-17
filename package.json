@@ -1,0 +1,18 @@
+{
+  "name": "@game-factory/studio",
+  "version": "1.0.0",
+  "description": "CLI tool for creating, building, evaluating, and publishing games using the Game Factory engine SDK",
+  "type": "module",
+  "bin": {
+    "game-studio": "./bin/game-studio.js"
+  },
+  "scripts": {
+    "build": "node lib/build.js",
+    "test": "echo \"Tests not yet implemented\" && exit 0"
+  },
+  "keywords": ["game", "ecs", "engine", "cli", "game-factory"],
+  "license": "MIT",
+  "dependencies": {
+    "esbuild-wasm": "^0.25.0"
+  }
+}
