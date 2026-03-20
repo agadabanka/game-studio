@@ -11,6 +11,7 @@
  *   pull-sdk        Pull latest @engine SDK from Game Factory
  *   serve           Start local dev server with hot reload
  *   info            Show project info and architecture
+ *   title-card      Generate title card image via Gemini (Nano Banana)
  */
 
 import { resolve, join } from 'path';
@@ -38,6 +39,7 @@ const COMMANDS = {
   'pull-sdk': () => import('../lib/pull-sdk.js'),
   serve: () => import('../lib/serve.js'),
   info: () => import('../lib/info.js'),
+  'title-card': () => import('../lib/title-card.js'),
 };
 
 function printUsage() {
@@ -56,6 +58,7 @@ function printUsage() {
     pull-sdk          Pull latest @engine SDK modules from Game Factory
     serve             Start local dev server (port 8080)
     info              Show project config and architecture diagram
+    title-card        Generate title card image via Gemini AI
 
   Options:
     --factory <url>   Game Factory URL (default: http://localhost:3000)
