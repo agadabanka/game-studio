@@ -1,0 +1,6 @@
+{
+  "name": "sokoban",
+  "factory": "http://localhost:3000",
+  "github": { "owner": "agadabanka", "repo": "sokoban" },
+  "engine": { "version": "latest" }
+}

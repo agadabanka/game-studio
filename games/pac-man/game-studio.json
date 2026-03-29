@@ -1,0 +1,6 @@
+{
+  "name": "pac-man",
+  "factory": "http://localhost:3000",
+  "github": { "owner": "agadabanka", "repo": "pac-man" },
+  "engine": { "version": "latest" }
+}

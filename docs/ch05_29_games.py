@@ -1,27 +1,28 @@
 #!/usr/bin/env python3
-"""Chapter 6: The 29 Games"""
+"""Chapter 6: The 34 Games"""
 import sys, os
 sys.path.insert(0, os.path.dirname(__file__))
 from book_styles import BookPDF, ACCENT_BLUE, ACCENT_GREEN, ACCENT_ORANGE, ACCENT_PURPLE, ACCENT_RED
 
-pdf = BookPDF("The 29 Games")
+pdf = BookPDF("The 34 Games")
 
-pdf.chapter_cover(6, "The 29 Games", "Catalog of Published Games Built with the Framework")
+pdf.chapter_cover(6, "The 34 Games", "Catalog of Published Games Built with the Framework")
 
 pdf.add_page()
 pdf.section_title("Overview")
 pdf.body_text(
-    "The Game Factory ecosystem has produced 29 published games spanning multiple genres: "
-    "puzzle, arcade, board, card, strategy, and word games. Each game is a standalone GitHub "
+    "The Game Factory ecosystem has produced 34 published games spanning multiple genres: "
+    "puzzle, arcade, board, card, strategy, and casual games. Each game is a standalone GitHub "
     "repository with game.js source, compiled bundle, and playable index.html. Together they "
     "serve as both a validation suite for the @engine SDK and a showcase of what the system "
-    "can produce."
+    "can produce. The latest batch of 5 games (Pac-Man, Frogger, Sokoban, Poker, Go) drove "
+    "the creation of three new SDK modules: turns.js, cards.js, and animate.js."
 )
 
 pdf.section_title("Games by Category", level=1)
 
 # ── BOARD GAMES ──
-pdf.section_title("Board Games (7)", level=2)
+pdf.section_title("Board Games (8)", level=2)
 
 games_board = [
     ("Chess", "chess", "Classic two-player chess with full piece movement rules, castling, en passant, "
@@ -44,6 +45,10 @@ games_board = [
     ("Tic-Tac-Toe", "tic-tac-toe", "Classic 3x3 grid. Two-player with win/draw detection. "
      "Simplest board game in the collection.",
      ["core", "render", "input"], "~10KB"),
+    ("Go (9x9)", "go", "Territory control on 9x9 board. Stone placement, capture via liberties, "
+     "ko rule, territory counting, AI opponent. Flood-fill algorithms for group detection. "
+     "First game to use @engine/turns for turn management.",
+     ["core", "render", "input", "ai", "turns"], "~20KB"),
 ]
 
 for name, repo, desc, modules, size in games_board:
@@ -52,7 +57,7 @@ for name, repo, desc, modules, size in games_board:
     pdf.body_text(f"Repository: agadabanka/{repo} | Bundle: {size} | Modules: {', '.join(modules)}")
 
 # ── PUZZLE GAMES ──
-pdf.section_title("Puzzle Games (6)", level=2)
+pdf.section_title("Puzzle Games (7)", level=2)
 
 games_puzzle = [
     ("Tetris", "tetris", "Classic Tetris with 7 tetromino types, rotation, hard/soft drop, "
@@ -73,6 +78,10 @@ games_puzzle = [
     ("Wordle", "wordle", "5-letter word guessing. Color-coded feedback (green/yellow/gray). "
      "6 attempts to guess the daily word.",
      ["core", "render", "input"], "~16KB"),
+    ("Sokoban", "sokoban", "Box-pushing puzzle with 5 hand-crafted levels. Push mechanics, "
+     "undo/history stack, move counting, level progression. Validated push-entity "
+     "interaction pattern and undo system for ECS.",
+     ["core", "grid", "render", "input"], "~16KB"),
 ]
 
 for name, repo, desc, modules, size in games_puzzle:
@@ -81,7 +90,7 @@ for name, repo, desc, modules, size in games_puzzle:
     pdf.body_text(f"Repository: agadabanka/{repo} | Bundle: {size} | Modules: {', '.join(modules)}")
 
 # ── ARCADE GAMES ──
-pdf.section_title("Arcade Games (7)", level=2)
+pdf.section_title("Arcade Games (9)", level=2)
 
 games_arcade = [
     ("Snake", "snake", "Classic snake game. Continuous movement, food collection, "
@@ -105,6 +114,14 @@ games_arcade = [
     ("Simon", "simon", "Memory pattern game. Colored buttons flash in sequence, "
      "player repeats. Sequence grows each round.",
      ["core", "render", "input"], "~11KB"),
+    ("Pac-Man", "pac-man", "Grid-based maze game. 4 AI ghosts with distinct chase strategies "
+     "(Blinky=chase, Pinky=ambush, Inky=flank, Clyde=random). Power pellet mode, "
+     "dot collection, tunnel wrapping. Validated compositeEvaluator for multi-personality AI.",
+     ["core", "grid", "render", "input", "ai"], "~20KB"),
+    ("Frogger", "frogger", "Lane-based obstacle avoidance. Cars on roads, logs on rivers. "
+     "Frog must ride logs (entity-rides-entity pattern). 5 home slots per level. "
+     "Per-lane scrolling at different speeds validates wrapPosition edge cases.",
+     ["core", "grid", "render", "input"], "~18KB"),
 ]
 
 for name, repo, desc, modules, size in games_arcade:
@@ -113,7 +130,7 @@ for name, repo, desc, modules, size in games_arcade:
     pdf.body_text(f"Repository: agadabanka/{repo} | Bundle: {size} | Modules: {', '.join(modules)}")
 
 # ── CARD GAMES ──
-pdf.section_title("Card Games (2)", level=2)
+pdf.section_title("Card Games (3)", level=2)
 
 games_card = [
     ("Solitaire", "solitaire", "Klondike solitaire. 7 tableau columns, stock/waste, "
@@ -122,6 +139,11 @@ games_card = [
     ("Blackjack", "blackjack", "Casino card game (21). Hit/stand decisions, dealer AI, "
      "bet management, standard deck dealing.",
      ["core", "render", "input", "ai"], "~16KB"),
+    ("Poker (Texas Hold'em)", "poker", "Multi-round tournament with 3 AI opponents. "
+     "Full hand evaluation (10 rankings from High Card to Royal Flush). "
+     "Multi-phase betting (preflop/flop/turn/river/showdown). AI personalities "
+     "(tight/loose/balanced). Drove creation of @engine/cards and @engine/turns modules.",
+     ["core", "render", "input", "ai", "cards", "turns"], "~22KB"),
 ]
 
 for name, repo, desc, modules, size in games_card:
@@ -181,16 +203,16 @@ pdf.body_text(
 )
 
 pdf.table(
-    ["Category", "Count", "core", "grid", "render", "board", "input", "ai"],
+    ["Category", "Count", "core", "grid", "render", "board", "input", "ai", "turns", "cards"],
     [
-        ["Board", "7", "Yes", "1/7", "Yes", "5/7", "Yes", "1/7"],
-        ["Puzzle", "6", "Yes", "4/6", "Yes", "No", "Yes", "No"],
-        ["Arcade", "7", "Yes", "3/7", "Yes", "No", "Yes", "1/7"],
-        ["Card", "2", "Yes", "No", "Yes", "No", "Yes", "1/2"],
-        ["Strategy", "3", "Yes", "2/3", "Yes", "No", "Yes", "1/3"],
-        ["Casual", "4", "Yes", "2/4", "Yes", "No", "Yes", "No"],
+        ["Board", "8", "Yes", "1/8", "Yes", "5/8", "Yes", "2/8", "1/8", "No"],
+        ["Puzzle", "7", "Yes", "5/7", "Yes", "No", "Yes", "No", "No", "No"],
+        ["Arcade", "9", "Yes", "5/9", "Yes", "No", "Yes", "2/9", "No", "No"],
+        ["Card", "3", "Yes", "No", "Yes", "No", "Yes", "2/3", "1/3", "1/3"],
+        ["Strategy", "3", "Yes", "2/3", "Yes", "No", "Yes", "1/3", "No", "No"],
+        ["Casual", "4", "Yes", "2/4", "Yes", "No", "Yes", "No", "No", "No"],
     ],
-    col_widths=[28, 18, 22, 22, 24, 22, 24, 22]
+    col_widths=[24, 16, 18, 18, 20, 18, 20, 18, 18, 18]
 )
 
 pdf.section_title("Game Complexity Spectrum", level=1)
