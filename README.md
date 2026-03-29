@@ -11,14 +11,14 @@ Part of the **Game Factory ecosystem** — a two-path system for game creation:
 
 Both paths share the same engine SDK, eval system, and GitHub integration. Improvements discovered via CLI development feed back into the SDK, making Web UI games better too.
 
-## 29 Published Games
+## 34 Published Games
 
 | Genre | Games |
 |-------|-------|
-| **Board (7)** | [Chess](https://github.com/agadabanka/chess), [Checkers](https://github.com/agadabanka/checkers), [Ludo](https://github.com/agadabanka/ludo), [Reversi](https://github.com/agadabanka/reversi), [Gomoku](https://github.com/agadabanka/gomoku), [Connect 4](https://github.com/agadabanka/connect4), [Tic-Tac-Toe](https://github.com/agadabanka/tic-tac-toe) |
-| **Puzzle (6)** | [Tetris](https://github.com/agadabanka/tetris), [2048](https://github.com/agadabanka/game2048), [Sudoku](https://github.com/agadabanka/sudoku), [Sliding Puzzle](https://github.com/agadabanka/sliding-puzzle), [Minesweeper](https://github.com/agadabanka/minesweeper), [Wordle](https://github.com/agadabanka/wordle) |
-| **Arcade (7)** | [Snake](https://github.com/agadabanka/snake), [Pong](https://github.com/agadabanka/pong), [Breakout](https://github.com/agadabanka/breakout), [Flappy](https://github.com/agadabanka/flappy), [Space Invaders](https://github.com/agadabanka/space-invaders), [Whack-a-Mole](https://github.com/agadabanka/whack-a-mole), [Simon](https://github.com/agadabanka/simon) |
-| **Card (2)** | [Solitaire](https://github.com/agadabanka/solitaire), [Blackjack](https://github.com/agadabanka/blackjack) |
+| **Board (8)** | [Chess](https://github.com/agadabanka/chess), [Checkers](https://github.com/agadabanka/checkers), [Ludo](https://github.com/agadabanka/ludo), [Reversi](https://github.com/agadabanka/reversi), [Gomoku](https://github.com/agadabanka/gomoku), [Connect 4](https://github.com/agadabanka/connect4), [Tic-Tac-Toe](https://github.com/agadabanka/tic-tac-toe), [Go](https://github.com/agadabanka/go) |
+| **Puzzle (7)** | [Tetris](https://github.com/agadabanka/tetris), [2048](https://github.com/agadabanka/game2048), [Sudoku](https://github.com/agadabanka/sudoku), [Sliding Puzzle](https://github.com/agadabanka/sliding-puzzle), [Minesweeper](https://github.com/agadabanka/minesweeper), [Wordle](https://github.com/agadabanka/wordle), [Sokoban](https://github.com/agadabanka/sokoban) |
+| **Arcade (9)** | [Snake](https://github.com/agadabanka/snake), [Pong](https://github.com/agadabanka/pong), [Breakout](https://github.com/agadabanka/breakout), [Flappy](https://github.com/agadabanka/flappy), [Space Invaders](https://github.com/agadabanka/space-invaders), [Whack-a-Mole](https://github.com/agadabanka/whack-a-mole), [Simon](https://github.com/agadabanka/simon), [Pac-Man](https://github.com/agadabanka/pac-man), [Frogger](https://github.com/agadabanka/frogger) |
+| **Card (3)** | [Solitaire](https://github.com/agadabanka/solitaire), [Blackjack](https://github.com/agadabanka/blackjack), [Poker](https://github.com/agadabanka/poker) |
 | **Strategy (3)** | [Tower Defense](https://github.com/agadabanka/tower-defense), [Roguelike](https://github.com/agadabanka/roguelike), [Battleship](https://github.com/agadabanka/battleship) |
 | **Casual (4)** | [Match 3](https://github.com/agadabanka/match3), [Memory](https://github.com/agadabanka/memory), [Lights Out](https://github.com/agadabanka/lights-out), [Hangman](https://github.com/agadabanka/hangman) |
 
@@ -113,6 +113,9 @@ world.getComponent(42, 'Position') → { x: 5, y: 10 }
 | `@engine/board` | `buildBoardMap`, `isLegalMove`, `isPathClear` | Chess-style board games |
 | `@engine/input` | `consumeAction`, `moveCursor` | Human-controlled games |
 | `@engine/ai` | `pickBestMove`, `pickWeightedMove`, `pickRandomMove`, `compositeEvaluator` | Games with AI opponents |
+| `@engine/turns` | `createTurnManager` → `.current()`, `.next()`, `.pass()`, `.extraTurn()`, `.skip()` | Multi-player turn-based games |
+| `@engine/cards` | `createDeck`, `shuffleDeck`, `dealCards`, `evaluatePokerHand`, `blackjackValue`, `drawCard` | Card games |
+| `@engine/animate` | `createTween`, `createPathTween`, `updateTweens`, easing functions | Smooth movement and transitions |
 
 ### Display Modes
 
@@ -184,6 +187,8 @@ the SDK for everyone — both CLI developers and Web UI users.
 game-studio/               # This repo — the CLI
 ├── bin/game-studio.js     # CLI entry point
 ├── lib/                   # Command implementations
+├── engine/                # New @engine SDK modules (turns, cards, animate)
+├── games/                 # Game source code (pac-man, frogger, sokoban, poker, go)
 ├── docs/                  # Book chapters, title cards, pitch deck
 ├── ARCHITECTURE.md        # Full system architecture
 ├── LEARNINGS.md           # SDK gaps from building 4 games
@@ -211,4 +216,5 @@ game-studio/               # This repo — the CLI
 ## Related Repos
 
 - [Game Factory](https://github.com/agadabanka/game-factory) — Web UI + engine server
-- [Chess](https://github.com/agadabanka/chess) · [Tetris](https://github.com/agadabanka/tetris) · [Snake](https://github.com/agadabanka/snake) · [Ludo](https://github.com/agadabanka/ludo) — Battle-tested @engine games
+- [Chess](https://github.com/agadabanka/chess) · [Tetris](https://github.com/agadabanka/tetris) · [Snake](https://github.com/agadabanka/snake) · [Ludo](https://github.com/agadabanka/ludo) — Batch 1 games
+- [Pac-Man](https://github.com/agadabanka/pac-man) · [Frogger](https://github.com/agadabanka/frogger) · [Sokoban](https://github.com/agadabanka/sokoban) · [Poker](https://github.com/agadabanka/poker) · [Go](https://github.com/agadabanka/go) — Batch 2 games

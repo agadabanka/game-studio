@@ -93,26 +93,39 @@ export default game;
 | `@engine/board` | `buildBoardMap`, `isLegalMove`, `isPathClear` | Chess-style board games only |
 | `@engine/input` | `consumeAction`, `moveCursor` | Every game with human input |
 | `@engine/ai` | `pickBestMove`, `pickWeightedMove`, `pickRandomMove`, `compositeEvaluator` | Games with AI opponents |
+| `@engine/turns` | `createTurnManager` → `.current()`, `.next()`, `.extraTurn()`, `.skip()`, `.pass()` | Multi-player turn-based games |
+| `@engine/cards` | `createDeck`, `shuffleDeck`, `dealCards`, `drawCards`, `evaluatePokerHand`, `blackjackValue`, `drawCard` | Card games (Poker, Blackjack, Solitaire) |
+| `@engine/animate` | `createTween`, `createPathTween`, `updateTweens`, `isAnimating`, `lerp`, easing functions (`easeIn`, `easeOut`, `easeInOut`, `bounce`, `elastic`) | Any game with smooth movement |
 
 ### Display Types
 
 - **Grid** (`type: 'grid'`): Canvas auto-sized as `width * cellSize + 180` (HUD). Use `drawGridBoard`, `drawPieceCells`.
 - **Custom** (`type: 'custom'`): Explicit `canvasWidth`, `canvasHeight`, `offsetX`, `offsetY`. Use pixel-based `drawToken`, `drawSquare`, `drawDice`.
 
-## The 29 Published Games
+## The 34 Published Games
 
 | Genre | Count | Games |
 |-------|-------|-------|
-| Board | 7 | Chess, Checkers, Ludo, Reversi, Gomoku, Connect 4, Tic-Tac-Toe |
-| Puzzle | 6 | Tetris, 2048, Sudoku, Sliding Puzzle, Minesweeper, Wordle |
-| Arcade | 7 | Snake, Pong, Breakout, Flappy, Space Invaders, Whack-a-Mole, Simon |
-| Card | 2 | Solitaire, Blackjack |
+| Board | 8 | Chess, Checkers, Ludo, Reversi, Gomoku, Connect 4, Tic-Tac-Toe, **Go (9x9)** |
+| Puzzle | 7 | Tetris, 2048, Sudoku, Sliding Puzzle, Minesweeper, Wordle, **Sokoban** |
+| Arcade | 9 | Snake, Pong, Breakout, Flappy, Space Invaders, Whack-a-Mole, Simon, **Pac-Man**, **Frogger** |
+| Card | 3 | Solitaire, Blackjack, **Poker (Texas Hold'em)** |
 | Strategy | 3 | Tower Defense, Roguelike, Battleship |
 | Casual | 4 | Match 3, Memory, Lights Out, Hangman |
 
 All published at `github.com/agadabanka/<game-name>`.
 
-Bundle sizes: 10-24KB. Complexity: 1-2 systems (Tic-Tac-Toe) → 6-8+ systems (Ludo, Roguelike).
+Bundle sizes: 10-24KB. Complexity: 1-2 systems (Tic-Tac-Toe) → 6-8+ systems (Ludo, Roguelike, Poker).
+
+### Games 30-34 (Batch 2)
+
+| Game | Genre | Key Pattern Validated | New Modules Used |
+|------|-------|---------------------|-----------------|
+| Pac-Man | Arcade | Maze navigation, 4 AI ghosts with personalities | ai.js (compositeEvaluator) |
+| Frogger | Arcade | Per-lane scrolling, entity-rides-entity | grid.js (wrapPosition) |
+| Sokoban | Puzzle | Push mechanics, undo/history stack | — (exposed need for history helper) |
+| Poker | Card | Multi-phase state machine, hidden info, betting | ai.js, cards.js, turns.js |
+| Go (9x9) | Board | Flood-fill groups, ko rule, territory scoring | ai.js, turns.js |
 
 ## CLI Commands
 
@@ -127,6 +140,14 @@ Bundle sizes: 10-24KB. Complexity: 1-2 systems (Tic-Tac-Toe) → 6-8+ systems (L
 | `publish` | `lib/publish.js` | Push to GitHub via `gh` CLI |
 | `info` | `lib/info.js` | Show project config |
 | `title-card` | `lib/title-card.js` | Generate title card via Gemini API |
+
+## New @engine Modules (Batch 2)
+
+Three new SDK modules were created from patterns discovered in games 30-34:
+
+- **turns.js** — Reusable turn manager with extra turns, skips, pass tracking, callbacks
+- **cards.js** — Deck creation, shuffling, dealing, poker hand evaluation, card rendering
+- **animate.js** — Property tweening, path animation, 6 easing functions, tween batch updates
 
 ## Project File Structure
 
@@ -143,9 +164,11 @@ game-studio/
 │   ├── pull-sdk.js          # SDK downloader
 │   ├── info.js              # Project info display
 │   └── title-card.js        # Gemini AI title card generator
+├── engine/                  # New @engine SDK modules (turns.js, cards.js, animate.js)
+├── games/                   # Game source code (pac-man, frogger, sokoban, poker, go)
 ├── docs/                    # Book chapters, title cards, pitch deck scripts
 ├── ARCHITECTURE.md          # Full system diagram & feedback loop
-├── LEARNINGS.md             # SDK gaps found from building 4 games
+├── LEARNINGS.md             # SDK gaps found from building 9 games
 ├── game-studio-book.pdf     # 57-page project documentation book
 ├── pitch-deck.pdf           # 15-slide VC pitch deck
 └── package.json             # Only dep: esbuild-wasm
@@ -164,14 +187,20 @@ Each scaffolded game project:
 
 ## Known SDK Gaps (from LEARNINGS.md)
 
-Priority fixes needed:
-1. **No turns.js** — Turn management hand-coded in each game
-2. **No path.js** — Track-based games (Ludo) can't use grid.js or board.js
-3. **render.js bloat** — Should split into render-grid, render-primitives, render-hud
-4. **No animate.js** — Movement is instant, no tweening
-5. **board.js too chess-specific** — Needs board-grid, board-track, board-hex variants
-6. **Events are frame-scoped** — Multi-frame coordination requires state machine workaround
-7. **Restart logic incomplete** — Each game reinvents restart; need `game.onRestart()` callback
+Resolved (Batch 2):
+- ~~No turns.js~~ → ✅ `@engine/turns.js` shipped
+- ~~No animate.js~~ → ✅ `@engine/animate.js` shipped
+- ~~No card abstractions~~ → ✅ `@engine/cards.js` shipped
+
+Remaining priority fixes:
+1. **No path.js** — Track-based games (Ludo) can't use grid.js or board.js
+2. **render.js bloat** — Should split into render-grid, render-primitives, render-hud
+3. **No state-machine.js** — Poker's 6-phase flow exposed this (also Ludo)
+4. **grid.js flood-fill** — Go's territory counting needs generic flood-fill helpers
+5. **No undo/history helper** — Sokoban's undo system is a common pattern
+6. **board.js too chess-specific** — Needs board-grid, board-track, board-hex variants
+7. **Events are frame-scoped** — Multi-frame coordination requires state machine workaround
+8. **Restart logic incomplete** — Each game reinvents restart; need `game.onRestart()` callback
 
 ## Key Architecture Concepts
 

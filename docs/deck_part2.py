@@ -104,9 +104,9 @@ pdf = Deck()
 pdf.slide()
 pdf.accent_bar(color=GREEN)
 pdf.title_text("Traction & Proof Points", color=WHITE)
-pdf.subtitle_text("29 games shipped. Zero lines of code required for users.", color=GREEN)
+pdf.subtitle_text("34 games shipped. Zero lines of code required for users.", color=GREEN)
 
-pdf.metric_box(25, 55, 52, 30, "29", "Games Published")
+pdf.metric_box(25, 55, 52, 30, "34", "Games Published")
 pdf.metric_box(82, 55, 52, 30, "7", "SDK Modules")
 pdf.metric_box(139, 55, 52, 30, "6", "Game Genres")
 pdf.metric_box(196, 55, 52, 30, "~1,300", "Lines of CLI Code")
@@ -119,10 +119,10 @@ pdf.bullet("Two creation paths operational: Web UI (non-technical) and CLI (deve
 pdf.bullet("Full publish pipeline: init -> build -> eval -> fix -> publish to GitHub in a single workflow", bullet_color=GREEN)
 pdf.slide_number(7)
 
-# ── SLIDE 8: THE 29 GAMES ──
+# ── SLIDE 8: THE 34 GAMES ──
 pdf.slide()
 pdf.accent_bar(color=PURPLE)
-pdf.title_text("The 29 Games", color=WHITE)
+pdf.title_text("The 34 Games", color=WHITE)
 pdf.subtitle_text("Built with Game Factory. Published on GitHub. Playable in browser.", color=PURPLE)
 
 games = [
@@ -162,7 +162,7 @@ pdf.subtitle_text("Why we win and keep winning", color=ORANGE)
 
 moats = [
     ("Flywheel Effect", "Every game built improves the engine. Engine improvements make all future games better. "
-     "29 games have already fed back 10 concrete improvements. This compounds.", ORANGE),
+     "34 games have already fed back 10 concrete improvements. This compounds.", ORANGE),
     ("Two-Path Synergy", "Web UI users generate volume (data). CLI developers generate depth (quality). "
      "No competitor has both -- they are either no-code OR dev tools.", BLUE),
     ("AI Quality Layer", "Built-in Claude-powered eval scores every game 0-100. Auto-fixes bugs. "
@@ -347,11 +347,11 @@ pdf.slide_number(12)
 pdf.slide()
 pdf.accent_bar(color=PURPLE)
 pdf.title_text("Roadmap", color=WHITE)
-pdf.subtitle_text("From 29 games to 10,000 games on the platform", color=PURPLE)
+pdf.subtitle_text("From 34 games to 10,000 games on the platform", color=PURPLE)
 
 phases = [
     ("NOW", "Foundation", [
-        "29 games published",
+        "34 games published",
         "7 SDK modules",
         "CLI + Web UI live",
         "AI eval operational",
@@ -419,7 +419,7 @@ pdf.slide_number(13)
 pdf.slide()
 pdf.accent_bar(color=GOLD)
 pdf.title_text("The Ask", color=WHITE)
-pdf.subtitle_text("Seed Round: $3M to go from 29 games to 10,000", color=GOLD)
+pdf.subtitle_text("Seed Round: $3M to go from 34 games to 10,000", color=GOLD)
 
 pdf.metric_box(25, 58, 62, 32, "$3M", "Raising")
 pdf.metric_box(92, 58, 62, 32, "18 mo", "Runway")
@@ -483,7 +483,7 @@ pdf.cell(250, 7, "Every game should ship in minutes, not months.")
 pdf.set_font("Helvetica", "B", 12)
 pdf.set_text_color(*GREEN)
 pdf.set_xy(30, 115)
-pdf.cell(250, 7, "29 games. 6 genres. 2 paths. 1 engine. Zero code required.")
+pdf.cell(250, 7, "34 games. 6 genres. 2 paths. 1 engine. Zero code required.")
 
 # Contact
 pdf.set_fill_color(*CARD_BG)

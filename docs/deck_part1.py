@@ -111,7 +111,7 @@ pdf.set_font("Helvetica", "", 10)
 pdf.set_text_color(*GRAY)
 pdf.cell(250, 6, "From natural language to published game in minutes, not months.")
 # Right side: key stats
-pdf.metric_box(200, 30, 75, 32, "29", "Games Published")
+pdf.metric_box(200, 30, 75, 32, "34", "Games Published")
 pdf.metric_box(200, 68, 75, 32, "<5 min", "Idea to Playable")
 pdf.metric_box(200, 106, 75, 32, "$0", "Cost to Create")
 pdf.set_font("Helvetica", "", 8)

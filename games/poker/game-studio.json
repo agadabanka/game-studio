@@ -1,0 +1,6 @@
+{
+  "name": "poker",
+  "factory": "http://localhost:3000",
+  "github": { "owner": "agadabanka", "repo": "poker" },
+  "engine": { "version": "latest" }
+}

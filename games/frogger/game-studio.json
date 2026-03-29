@@ -1,0 +1,6 @@
+{
+  "name": "frogger",
+  "factory": "http://localhost:3000",
+  "github": { "owner": "agadabanka", "repo": "frogger" },
+  "engine": { "version": "latest" }
+}

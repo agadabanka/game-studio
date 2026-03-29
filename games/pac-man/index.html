@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>pac-man — Game Studio</title>
+<style>
+  body { margin: 0; background: #111; display: flex; justify-content: center; align-items: center; min-height: 100vh; font-family: monospace; }
+  canvas { display: block; border-radius: 4px; }
+  .controls { position: fixed; bottom: 20px; color: #666; font-size: 12px; text-align: center; }
+  #title-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: #000; display: flex; justify-content: center; align-items: center;
+    z-index: 1000; cursor: pointer; transition: opacity 0.5s ease;
+    flex-direction: column;
+  }
+  #title-overlay.hidden { opacity: 0; pointer-events: none; }
+  #title-overlay img {
+    max-width: 90%; max-height: 80vh; object-fit: contain;
+    border-radius: 8px; box-shadow: 0 0 40px rgba(59,130,246,0.3);
+  }
+  #title-overlay .start-hint {
+    position: absolute; bottom: 40px; color: #888; font-size: 14px;
+    font-family: monospace; animation: blink 1.5s infinite;
+  }
+  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+</style>
+</head>
+<body>
+<div id="title-overlay">
+  <img src="assets/title-card.png" alt="pac-man Title Card"
+       onerror="document.getElementById('title-overlay').style.display='none'">
+  <div class="start-hint">Click or press any key to play</div>
+</div>
+<canvas id="game-canvas"></canvas>
+<div class="controls">Arrow keys: move | Space: action | R: restart</div>
+<script type="module">
+  import game from './dist/game.bundle.js';
+  game.start(document.getElementById('game-canvas'));
+
+  const overlay = document.getElementById('title-overlay');
+  if (overlay) {
+    function dismissTitle() {
+      overlay.classList.add('hidden');
+      setTimeout(() => overlay.style.display = 'none', 500);
+      document.removeEventListener('keydown', dismissTitle);
+      overlay.removeEventListener('click', dismissTitle);
+    }
+    overlay.addEventListener('click', dismissTitle);
+    document.addEventListener('keydown', dismissTitle);
+  }
+</script>
+</body>
+</html>
