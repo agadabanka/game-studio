@@ -119,6 +119,8 @@ async function main() {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     console.error('Error: Set GEMINI_API_KEY environment variable');
+    console.error('       For GIF-based generation without API:');
+    console.error('       python3 docs/generate_title_card_with_gif.py <game> --gif <gif-path>');
     process.exit(1);
   }
 

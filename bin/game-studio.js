@@ -62,7 +62,8 @@ function printUsage() {
     pull-sdk          Pull latest @engine SDK modules from Game Factory
     serve             Start local dev server (port 8080)
     info              Show project config and architecture diagram
-    title-card        Generate title card image via Gemini AI
+    title-card        Generate title card image via Gemini AI (Nano Banana)
+                      Use --gif <path> for enhanced mode with gameplay GIF compositing
     add-game <name>   Register a new game in games.json registry
     sync              Propagate games.json → README, CLAUDE.md, build system
     sync --stats      Show game registry statistics
