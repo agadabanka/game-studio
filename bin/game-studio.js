@@ -12,6 +12,8 @@
  *   serve           Start local dev server with hot reload
  *   info            Show project info and architecture
  *   title-card      Generate title card image via Gemini (Nano Banana)
+ *   add-game        Register a new game in games.json registry
+ *   sync            Propagate games.json to README, CLAUDE.md, build system
  */
 
 import { resolve, join } from 'path';
@@ -40,6 +42,8 @@ const COMMANDS = {
   serve: () => import('../lib/serve.js'),
   info: () => import('../lib/info.js'),
   'title-card': () => import('../lib/title-card.js'),
+  'add-game': () => import('../lib/add-game.js'),
+  sync: () => import('../lib/sync.js'),
 };
 
 function printUsage() {
@@ -59,6 +63,10 @@ function printUsage() {
     serve             Start local dev server (port 8080)
     info              Show project config and architecture diagram
     title-card        Generate title card image via Gemini AI
+    add-game <name>   Register a new game in games.json registry
+    sync              Propagate games.json → README, CLAUDE.md, build system
+    sync --stats      Show game registry statistics
+    sync --check      Verify files are in sync (for CI)
 
   Options:
     --factory <url>   Game Factory URL (default: http://localhost:3000)
