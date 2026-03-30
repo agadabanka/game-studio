@@ -46,8 +46,11 @@ const game = defineGame({
     right:   { keys: ['ArrowRight', 'd'] },
     action:  { keys: [' ', 'Enter'] },
     restart: { keys: ['r', 'R'] },
+    mode:    { keys: ['m', 'M'] },
   },
 });
+
+game.resource('gameMode', { mode: 'playerVsAi' });
 
 game.component('Cursor', { x: 4, y: 4 });
 
@@ -216,6 +219,13 @@ game.system('spawn', function spawnSystem(world, _dt) {
 game.system('input', function inputSystem(world, _dt) {
   const state = world.getResource('state');
   const input = world.getResource('input');
+  const gm = world.getResource('gameMode');
+
+  // Toggle AI vs AI mode
+  if (consumeAction(input, 'mode')) {
+    gm.mode = gm.mode === 'playerVsAi' ? 'aiVsAi' : 'playerVsAi';
+    state.message = gm.mode === 'aiVsAi' ? 'AI vs AI mode' : 'Player vs AI mode';
+  }
 
   if (state.gameOver) {
     if (consumeAction(input, 'restart')) {
@@ -226,6 +236,7 @@ game.system('input', function inputSystem(world, _dt) {
   }
 
   if (state.currentPlayer !== BLACK) return; // Wait for AI
+  if (gm.mode !== 'playerVsAi') return; // AI controls Black in aiVsAi
 
   const cursors = world.query('Cursor');
   if (cursors.length === 0) return;
@@ -270,16 +281,24 @@ game.system('input', function inputSystem(world, _dt) {
 // --- AI System ---
 game.system('ai', function aiSystem(world, dt) {
   const state = world.getResource('state');
-  if (state.gameOver || state.currentPlayer !== WHITE) return;
+  const gm = world.getResource('gameMode');
+  const isAiTurn = state.currentPlayer === WHITE ||
+    (gm.mode === 'aiVsAi' && state.currentPlayer === BLACK);
+  if (state.gameOver || !isAiTurn) return;
 
   state.aiTimer += dt;
   if (state.aiTimer < 0.5) return;
+
+  const player = state.currentPlayer;
+  const opponent = player === BLACK ? WHITE : BLACK;
+  const playerName = player === BLACK ? 'Black' : 'White';
+  const opponentName = player === BLACK ? 'White' : 'Black';
 
   // Find all legal moves
   const moves = [];
   for (let y = 0; y < SIZE; y++) {
     for (let x = 0; x < SIZE; x++) {
-      if (isLegalMove(state.board, x, y, WHITE, state.lastBoard)) {
+      if (isLegalMove(state.board, x, y, player, state.lastBoard)) {
         moves.push({ x, y });
       }
     }
@@ -289,15 +308,15 @@ game.system('ai', function aiSystem(world, dt) {
     // Pass
     state.consecutivePasses++;
     state.lastBoard = copyBoard(state.board);
-    state.currentPlayer = BLACK;
-    state.message = 'White passes';
+    state.currentPlayer = opponent;
+    state.message = `${playerName} passes`;
     if (state.consecutivePasses >= 2) endGame(state);
     return;
   }
 
   // Evaluate moves
   const chosen = pickBestMove(moves, (move) => {
-    const result = applyMove(state.board, move.x, move.y, WHITE);
+    const result = applyMove(state.board, move.x, move.y, player);
     let score = result.captured * 10; // Captures are valuable
 
     // Prefer center positions early
@@ -315,23 +334,23 @@ game.system('ai', function aiSystem(world, dt) {
 
     // Territory potential
     const territory = countTerritory(result.board);
-    score += (territory[WHITE] - territory[BLACK]) * 0.5;
+    score += (territory[player] - territory[opponent]) * 0.5;
 
     return score;
   });
 
   if (chosen) {
     const lastBoard = copyBoard(state.board);
-    const result = applyMove(state.board, chosen.x, chosen.y, WHITE);
+    const result = applyMove(state.board, chosen.x, chosen.y, player);
     state.board = result.board;
-    state.captures[WHITE] += result.captured;
+    state.captures[player] += result.captured;
     state.lastBoard = lastBoard;
     state.consecutivePasses = 0;
     state.moveCount++;
-    state.message = `White plays ${String.fromCharCode(65 + chosen.x)}${SIZE - chosen.y}`;
+    state.message = `${playerName} plays ${String.fromCharCode(65 + chosen.x)}${SIZE - chosen.y}`;
   }
 
-  state.currentPlayer = BLACK;
+  state.currentPlayer = opponent;
 });
 
 function endGame(state) {
@@ -434,8 +453,9 @@ game.system('render', function renderSystem(world, _dt) {
     }
   }
 
-  // Draw cursor
-  if (!state.gameOver && state.currentPlayer === BLACK) {
+  // Draw cursor (only in player mode)
+  const gm = world.getResource('gameMode');
+  if (!state.gameOver && state.currentPlayer === BLACK && gm.mode === 'playerVsAi') {
     for (const cid of world.query('Cursor')) {
       const cur = world.getComponent(cid, 'Cursor');
       const cx = bx + cur.x * CELL;
@@ -465,7 +485,10 @@ game.system('render', function renderSystem(world, _dt) {
 
   ctx.font = '14px monospace';
   ctx.fillStyle = '#000';
-  ctx.fillText(`Turn: ${state.currentPlayer === BLACK ? 'Black (You)' : 'White (AI)'}`, hudX, by + 40);
+  const turnLabel = gm.mode === 'aiVsAi'
+    ? `Turn: ${state.currentPlayer === BLACK ? 'Black (AI)' : 'White (AI)'}`
+    : `Turn: ${state.currentPlayer === BLACK ? 'Black (You)' : 'White (AI)'}`;
+  ctx.fillText(turnLabel, hudX, by + 40);
 
   ctx.fillText('Captures:', hudX, by + 70);
   ctx.fillText(`  Black: ${state.captures[BLACK]}`, hudX, by + 90);
@@ -478,6 +501,10 @@ game.system('render', function renderSystem(world, _dt) {
   ctx.fillText('Arrows: move cursor', hudX, by + 180);
   ctx.fillText('Space: place stone', hudX, by + 196);
   ctx.fillText('R: pass', hudX, by + 212);
+  ctx.fillText('M: toggle AI mode', hudX, by + 228);
+  ctx.fillStyle = gm.mode === 'aiVsAi' ? '#FF4444' : '#4CAF50';
+  ctx.font = 'bold 11px monospace';
+  ctx.fillText(gm.mode === 'aiVsAi' ? '[AI vs AI]' : '[Player vs AI]', hudX, by + 248);
 
   // Message
   if (state.message) {

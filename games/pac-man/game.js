@@ -71,8 +71,11 @@ const game = defineGame({
     left:    { keys: ['ArrowLeft', 'a'] },
     right:   { keys: ['ArrowRight', 'd'] },
     restart: { keys: ['r', 'R'] },
+    mode:    { keys: ['m', 'M'] },
   },
 });
+
+game.resource('gameMode', { mode: 'playerVsAi' });
 
 game.component('Position', { x: 0, y: 0 });
 game.component('Direction', { dx: 0, dy: 0 });
@@ -132,8 +135,15 @@ game.system('spawn', function spawnSystem(world, _dt) {
 // --- Input System ---
 game.system('input', function inputSystem(world, _dt) {
   const state = world.getResource('state');
+  const input = world.getResource('input');
+  const gm = world.getResource('gameMode');
+
+  // Toggle AI vs AI mode
+  if (consumeAction(input, 'mode')) {
+    gm.mode = gm.mode === 'playerVsAi' ? 'aiVsAi' : 'playerVsAi';
+  }
+
   if (state.gameOver) {
-    const input = world.getResource('input');
     if (consumeAction(input, 'restart')) {
       world.setResource('_spawned', false);
       state.score = 0; state.lives = 3; state.level = 1;
@@ -144,7 +154,8 @@ game.system('input', function inputSystem(world, _dt) {
     return;
   }
 
-  const input = world.getResource('input');
+  if (gm.mode !== 'playerVsAi') return; // AI controls Pac-Man in aiVsAi
+
   const maze = world.getResource('maze');
   const players = world.query('Player');
   if (players.length === 0) return;
@@ -161,6 +172,72 @@ game.system('input', function inputSystem(world, _dt) {
         dir.dy = d.dy;
       }
     }
+  }
+});
+
+// --- Pac-Man AI System (for aiVsAi mode) ---
+game.system('pacmanAI', function pacmanAISystem(world, _dt) {
+  const gm = world.getResource('gameMode');
+  if (gm.mode !== 'aiVsAi') return;
+
+  const state = world.getResource('state');
+  if (state.gameOver) return;
+
+  const maze = world.getResource('maze');
+  const players = world.query('Player');
+  if (players.length === 0) return;
+
+  const pos = world.getComponent(players[0], 'Position');
+  const dir = world.getComponent(players[0], 'Direction');
+
+  // Find nearest dot/pellet using BFS
+  const ghosts = world.query('Ghost');
+  const ghostPositions = new Set();
+  for (const gid of ghosts) {
+    const gp = world.getComponent(gid, 'Position');
+    const ghost = world.getComponent(gid, 'Ghost');
+    if (!ghost.eaten && !ghost.frightened) {
+      ghostPositions.add(`${gp.x},${gp.y}`);
+    }
+  }
+
+  // Evaluate moves: prefer dots, avoid ghosts
+  const moves = [];
+  for (const [, d] of Object.entries(DIRS)) {
+    const nx = pos.x + d.dx;
+    const ny = pos.y + d.dy;
+    if (nx >= 0 && nx < COLS && ny >= 0 && ny < ROWS && maze[ny][nx] !== 1) {
+      let score = 0;
+      // Strongly prefer dots and pellets
+      if (maze[ny][nx] === 2) score += 10;
+      if (maze[ny][nx] === 3) score += 50;
+
+      // Avoid non-frightened ghosts
+      for (const gid of ghosts) {
+        const gp = world.getComponent(gid, 'Position');
+        const ghost = world.getComponent(gid, 'Ghost');
+        if (ghost.eaten) continue;
+        const dist = Math.abs(nx - gp.x) + Math.abs(ny - gp.y);
+        if (ghost.frightened) {
+          score += Math.max(0, 5 - dist) * 10; // Chase frightened ghosts
+        } else {
+          if (dist < 3) score -= (4 - dist) * 20; // Flee from close ghosts
+        }
+      }
+
+      // Slight preference for continuing current direction
+      if (d.dx === dir.dx && d.dy === dir.dy) score += 1;
+      // Add randomness to avoid loops
+      score += Math.random() * 2;
+
+      moves.push({ dx: d.dx, dy: d.dy, score });
+    }
+  }
+
+  if (moves.length > 0) {
+    moves.sort((a, b) => b.score - a.score);
+    dir.dx = moves[0].dx;
+    dir.dy = moves[0].dy;
   }
 });
 
@@ -436,6 +513,13 @@ game.system('render', function renderSystem(world, _dt) {
 
   drawHUD(ctx, { score: state.score, lives: state.lives, level: state.level },
     offsetX, W, offsetY, { fields: ['score', 'lives', 'level'], fontSize: 16 });
+
+  // Mode indicator
+  const gm = world.getResource('gameMode');
+  ctx.fillStyle = gm.mode === 'aiVsAi' ? '#FF4444' : '#4CAF50';
+  ctx.font = '11px monospace';
+  ctx.fillText(gm.mode === 'aiVsAi' ? '[AI vs AI] M: toggle' : '[Player vs AI] M: toggle',
+    offsetX + 4, offsetY + H + 35);
 
   if (state.gameOver) {
     drawGameOver(ctx, offsetX, offsetY, W, H, {

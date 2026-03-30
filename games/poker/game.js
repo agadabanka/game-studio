@@ -157,8 +157,11 @@ const game = defineGame({
     up:      { keys: ['ArrowUp', 'w'] },
     down:    { keys: ['ArrowDown', 's'] },
     restart: { keys: ['r', 'R'] },
+    mode:    { keys: ['m', 'M'] },
   },
 });
+
+game.resource('gameMode', { mode: 'playerVsAi' });
 
 game.component('Card', { suit: '', rank: '', value: 0, faceUp: false });
 
@@ -233,6 +236,12 @@ game.system('spawn', function spawnSystem(world, _dt) {
 game.system('input', function inputSystem(world, _dt) {
   const state = world.getResource('state');
   const input = world.getResource('input');
+  const gm = world.getResource('gameMode');
+
+  // Toggle AI vs AI mode
+  if (consumeAction(input, 'mode')) {
+    gm.mode = gm.mode === 'playerVsAi' ? 'aiVsAi' : 'playerVsAi';
+  }
 
   if (state.gameOver) {
     if (consumeAction(input, 'restart')) {
@@ -245,6 +254,7 @@ game.system('input', function inputSystem(world, _dt) {
   }
 
   if (state.phase === 'showdown') return;
+  if (gm.mode !== 'playerVsAi') return; // AI controls human player in aiVsAi
 
   const currentPlayer = state.players[state.currentPlayerIdx];
   if (!currentPlayer || !currentPlayer.isHuman || currentPlayer.folded) return;
@@ -332,8 +342,11 @@ game.system('ai', function aiSystem(world, dt) {
   const state = world.getResource('state');
   if (state.gameOver || state.phase === 'showdown') return;
 
+  const gm = world.getResource('gameMode');
   const current = state.players[state.currentPlayerIdx];
-  if (!current || current.isHuman || current.folded) return;
+  if (!current || current.folded) return;
+  // In playerVsAi mode, skip human player; in aiVsAi, AI plays for everyone
+  if (current.isHuman && gm.mode === 'playerVsAi') return;
 
   state.actionTimer += dt;
   if (state.actionTimer < 0.8) return;
@@ -487,8 +500,9 @@ game.system('render', function renderSystem(world, _dt) {
       ctx.fillText('FOLDED', pos.x, pos.y + 32);
     }
 
-    // Cards
-    const showCards = p.isHuman || state.phase === 'showdown';
+    // Cards — show all in aiVsAi mode
+    const gm = world.getResource('gameMode');
+    const showCards = p.isHuman || state.phase === 'showdown' || gm.mode === 'aiVsAi';
     for (let c = 0; c < p.hand.length; c++) {
       drawCard(ctx, pos.x + c * 50, pos.y + 40, p.hand[c], showCards && !p.folded);
     }
@@ -526,10 +540,13 @@ game.system('render', function renderSystem(world, _dt) {
     ctx.textAlign = 'left';
   }
 
-  // Phase indicator
+  // Phase indicator + mode
+  const gmMode = world.getResource('gameMode');
   ctx.fillStyle = '#AAA';
   ctx.font = '12px monospace';
   ctx.fillText(`Round ${state.roundNum} | ${state.phase.toUpperCase()}`, 20, 590);
+  ctx.fillStyle = gmMode.mode === 'aiVsAi' ? '#FF4444' : '#4CAF50';
+  ctx.fillText(gmMode.mode === 'aiVsAi' ? '[AI vs AI] M: toggle' : '[Player vs AI] M: toggle', 20, 575);
 
   if (state.gameOver) {
     drawGameOver(ctx, 50, 50, 800, 500, {
