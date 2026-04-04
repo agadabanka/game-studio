@@ -284,9 +284,211 @@ function roundRect(ctx, x, y, w, h, r) {
 
 ## Priority Order for Fixes
 
-1. **turns.js** — High value, low effort. Every game needs turns.
+1. **turns.js** — High value, low effort. Every game needs turns. ✅ DONE
 2. **path.js** — Unlocks track-based board games (Ludo, Monopoly, etc.)
 3. **render split** — Code organization, prevents render.js from becoming 1000+ lines
-4. **animate.js** — High visual impact but significant effort
+4. **animate.js** — High visual impact but significant effort. ✅ DONE
 5. **board.js rename** — Clarity, prevents confusion about chess-specificity
 6. **Event system upgrade** — Unlocks complex multi-frame game logic
+7. **cards.js** — Card game abstractions. ✅ DONE
+
+---
+
+## Batch 2: Learnings from Games 30-34
+
+Updated: 2026-03-29
+
+Five new games built: Pac-Man, Frogger, Sokoban, Poker (Texas Hold'em), Go (9x9).
+Three new SDK modules shipped: `@engine/turns`, `@engine/cards`, `@engine/animate`.
+
+---
+
+## 11. No Card Game Abstraction
+
+**Exposed by:** Poker (Texas Hold'em), confirmed by existing Blackjack and Solitaire
+
+**Problem:** Card games all reimplement deck creation, shuffling, dealing, and hand
+evaluation. Poker needed a full 52-card deck, Fisher-Yates shuffle, poker hand
+ranking (10 hand types), and combination generation. Blackjack already had
+similar code for deck and ace-value logic.
+
+**Solution:** Created `@engine/cards.js` with:
+- `createDeck(opts)` — standard 52-card deck, optional jokers
+- `shuffleDeck(deck)` — Fisher-Yates shuffle
+- `dealCards(deck, numPlayers, cardsPerPlayer)` — distribute cards
+- `drawCards(deck, count)` — draw from top
+- `blackjackValue(hand)` — ace-aware hand value
+- `evaluatePokerHand(cards)` — best 5-card hand from up to 7 cards
+- `comparePokerHands(a, b)` — compare two evaluations
+- `drawCard(ctx, x, y, card, faceUp)` — render a card on canvas
+
+**Impact:** Blackjack and Solitaire can now import from `@engine/cards` instead
+of reimplementing. Poker game reduced by ~80 lines using shared module.
+
+---
+
+## 12. Turn Management Was Always Hand-Coded
+
+**Exposed by:** Go (consecutive pass detection), Poker (multi-phase betting rounds)
+
+**Problem:** Every multi-player game reinvented turn management. Go needed
+consecutive pass tracking (two passes = game ends). Poker needed multi-phase
+turns (preflop → flop → turn → river) with betting rounds within each phase.
+Chess toggles black/white. Ludo cycles through 4 players with extra turns on 6.
+
+**Solution:** Created `@engine/turns.js` with:
+- `createTurnManager(players, opts)` — reusable turn manager
+- `.current()`, `.next()`, `.extraTurn()`, `.skip()`, `.unskip()`
+- `.pass()` with consecutive pass tracking and `allPassed` detection
+- `.setCurrentPlayer()`, `.getTurnCount()`, `.activePlayers()`
+- Callbacks: `onTurnEnd`, `onTurnStart`
+
+**Design decision:** The turn manager is a plain object, not an ECS component.
+Games store it as a resource: `game.resource('turns', createTurnManager([...]))`.
+This matches the ECS pattern where systems read/write resources.
+
+---
+
+## 13. Movement Animation Is Essential for Polish
+
+**Exposed by:** Pac-Man (ghost movement), Frogger (log riding), Go (stone placement)
+
+**Problem:** All movement is teleportation — entities jump from A to B instantly.
+Pac-Man ghosts snap between cells. Frogger's frog jumps without transition.
+Go stones appear without any visual feedback. This makes games feel static
+and reduces player satisfaction.
+
+**Solution:** Created `@engine/animate.js` with:
+- `createTween(target, property, from, to, duration, easing)` — property animation
+- `createPathTween(target, xProp, yProp, waypoints, speed)` — path following
+- `updateTweens(tweens, dt)` — batch update all active tweens
+- `isAnimating(tweens)` — check if animations are running
+- `lerp(a, b, t)` — linear interpolation helper
+- Easing functions: `linear`, `easeIn`, `easeOut`, `easeInOut`, `bounce`, `elastic`
+
+**Pattern:** Tweens are stored as a resource array. Systems create tweens for
+movement, and the render system calls `updateTweens(tweens, dt)` each frame.
+
+---
+
+## 14. Maze/Grid Collision Needs Per-Cell Type Support
+
+**Exposed by:** Pac-Man (walls, dots, power pellets, ghost house)
+
+**Problem:** `@engine/grid.js` treats cells as binary (occupied/empty). Pac-Man
+needs 5 cell types: wall, empty, dot, power pellet, ghost house gate. The
+existing `collides()` function only checks for non-zero cells, which doesn't
+distinguish between types.
+
+**Workaround:** Pac-Man uses a custom maze array with cell-type integers (0-4)
+and handles collision/pickup logic in its own systems instead of using grid.js.
+
+**Recommendation:** Add cell-type-aware helpers to grid.js:
+```javascript
+export function getCellType(grid, x, y) { ... }
+export function findCells(grid, type) { ... }  // All positions matching type
+export function collidesWithType(shape, x, y, grid, types) { ... }
+```
+
+---
+
+## 15. Undo/History Stack Is a Common Pattern
+
+**Exposed by:** Sokoban (undo moves), applicable to Chess, Go
+
+**Problem:** Sokoban needs full undo capability — every move (player position +
+optional box push) is recorded and can be reversed. This pattern also applies
+to Chess (take back move), Go (reviewing game history), and any puzzle game.
+
+**Workaround:** Sokoban implements its own history array in state, storing
+`{ px, py, boxId?, bx?, by? }` per move. Undo pops the stack and restores
+positions directly.
+
+**Recommendation:** Add a generic undo helper:
+```javascript
+export function createHistory(maxSize) {
+  return {
+    push(snapshot) { ... },
+    undo() { ... },  // Returns last snapshot or null
+    canUndo() { ... },
+    clear() { ... },
+  };
+}
+```
+
+---
+
+## 16. Complex State Machines Need Better Support
+
+**Exposed by:** Poker (deal → preflop → flop → turn → river → showdown)
+
+**Problem:** Poker has 6 distinct phases, each with different rules for which
+actions are available and how turns advance. This is a state machine with
+transitions triggered by game events. The ECS event system (frame-scoped)
+doesn't support this well. Poker implements it as a string `phase` in state
+with explicit transition logic scattered across systems.
+
+**Confirmed from:** Learning #9 (events are frame-scoped only)
+
+**Recommendation:** Add `@engine/state-machine.js`:
+```javascript
+export function createStateMachine(config) {
+  // config: { states: { name: { onEnter, onExit, transitions } } }
+  return {
+    current() { ... },
+    transition(event) { ... },
+    canTransition(event) { ... },
+  };
+}
+```
+
+---
+
+## 17. Territory/Flood-Fill Is Reusable
+
+**Exposed by:** Go (territory counting, liberty detection, group finding)
+
+**Problem:** Go requires multiple flood-fill operations: finding connected groups
+of stones, counting liberties per group, and counting territory (empty regions
+bounded by one color). These are generic graph algorithms that would also apply
+to Reversi (disc flipping), Minesweeper (empty region reveal), and Match-3
+(connected component detection).
+
+**Workaround:** Go implements `getGroup()`, `countTerritory()` as local functions
+with visited-set-based flood fill.
+
+**Recommendation:** Add flood-fill helpers to grid.js:
+```javascript
+export function floodFill(grid, x, y, predicate) { ... }  // Returns connected cells
+export function findGroups(grid, predicate) { ... }  // All connected groups
+export function countEnclosed(grid, emptyVal, groupFn) { ... }  // Territory counting
+```
+
+---
+
+## Updated SDK Module Evolution
+
+| Current Module | Status | Games Using It | Notes |
+|---------------|--------|---------------|-------|
+| core.js | Stable | All 34 | No changes needed |
+| ecs.js | Stable | All 34 | Used internally by core |
+| grid.js | Needs expansion | Tetris, Snake, Minesweeper, etc. | Add cell-type, flood-fill |
+| render.js | Getting bloated | All 34 | Split still recommended |
+| board.js | Chess-specific | Chess, Checkers, Reversi, Gomoku | Rename or split |
+| input.js | Stable | All human games | No changes needed |
+| ai.js | Expanding | Ludo, Pac-Man, Go, Poker, Pong | Add minimax, MCTS |
+| **turns.js** | **NEW** | Go, Poker (retrofittable to Chess, Ludo) | Turn management |
+| **cards.js** | **NEW** | Poker (retrofittable to Blackjack, Solitaire) | Card abstractions |
+| **animate.js** | **NEW** | Available to all games | Tweening, path animation |
+
+## Updated Priority Fixes
+
+1. ~~turns.js~~ ✅ Shipped
+2. **path.js** — Still needed for Ludo, Monopoly track games
+3. **render split** — Now 15+ draw functions, split is overdue
+4. ~~animate.js~~ ✅ Shipped
+5. ~~cards.js~~ ✅ Shipped
+6. **state-machine.js** — Exposed by Poker's 6-phase game flow
+7. **grid.js flood-fill** — Exposed by Go's territory counting
+8. **undo/history helper** — Exposed by Sokoban's undo system
+9. **board.js generalization** — Still chess-specific

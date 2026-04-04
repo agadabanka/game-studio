@@ -1,0 +1,6 @@
+{
+  "name": "go",
+  "factory": "http://localhost:3000",
+  "github": { "owner": "agadabanka", "repo": "go" },
+  "engine": { "version": "latest" }
+}

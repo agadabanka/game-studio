@@ -1,0 +1,65 @@
+{
+  "version": "2.0.0",
+  "totalGames": 34,
+  "sdkModules": {
+    "core":    { "file": "core.js",    "status": "stable",  "since": "1.0.0" },
+    "ecs":     { "file": "ecs.js",     "status": "stable",  "since": "1.0.0" },
+    "grid":    { "file": "grid.js",    "status": "stable",  "since": "1.0.0" },
+    "render":  { "file": "render.js",  "status": "stable",  "since": "1.0.0" },
+    "board":   { "file": "board.js",   "status": "stable",  "since": "1.0.0" },
+    "input":   { "file": "input.js",   "status": "stable",  "since": "1.0.0" },
+    "ai":      { "file": "ai.js",      "status": "stable",  "since": "1.1.0" },
+    "turns":   { "file": "turns.js",   "status": "new",     "since": "2.0.0" },
+    "cards":   { "file": "cards.js",   "status": "new",     "since": "2.0.0" },
+    "animate": { "file": "animate.js", "status": "new",     "since": "2.0.0" }
+  },
+  "genres": {
+    "board":    { "label": "Board",    "color": "#3B82F6" },
+    "puzzle":   { "label": "Puzzle",   "color": "#8B5CF6" },
+    "arcade":   { "label": "Arcade",   "color": "#EF4444" },
+    "card":     { "label": "Card",     "color": "#F59E0B" },
+    "strategy": { "label": "Strategy", "color": "#10B981" },
+    "casual":   { "label": "Casual",   "color": "#EC4899" }
+  },
+  "games": [
+    { "name": "Chess",           "repo": "chess",           "genre": "board",    "modules": ["core","board","render","input"],               "size": "24KB",  "systems": 7, "batch": 1 },
+    { "name": "Checkers",        "repo": "checkers",        "genre": "board",    "modules": ["core","board","render","input"],               "size": "~18KB", "systems": 5, "batch": 1 },
+    { "name": "Ludo",            "repo": "ludo",            "genre": "board",    "modules": ["core","render","input","ai"],                  "size": "~22KB", "systems": 8, "batch": 1 },
+    { "name": "Reversi",         "repo": "reversi",         "genre": "board",    "modules": ["core","board","render","input"],               "size": "~16KB", "systems": 5, "batch": 1 },
+    { "name": "Gomoku",          "repo": "gomoku",          "genre": "board",    "modules": ["core","board","render","input"],               "size": "~15KB", "systems": 4, "batch": 1 },
+    { "name": "Connect 4",      "repo": "connect4",        "genre": "board",    "modules": ["core","grid","render","input"],                "size": "~16KB", "systems": 5, "batch": 1 },
+    { "name": "Tic-Tac-Toe",    "repo": "tic-tac-toe",     "genre": "board",    "modules": ["core","render","input"],                       "size": "~10KB", "systems": 2, "batch": 1 },
+    { "name": "Go (9x9)",       "repo": "go",              "genre": "board",    "modules": ["core","render","input","ai","turns"],           "size": "~20KB", "systems": 6, "batch": 2 },
+
+    { "name": "Tetris",          "repo": "tetris",          "genre": "puzzle",   "modules": ["core","grid","render","input"],                "size": "19KB",  "systems": 5, "batch": 1 },
+    { "name": "2048",            "repo": "game2048",        "genre": "puzzle",   "modules": ["core","grid","render","input"],                "size": "~15KB", "systems": 4, "batch": 1 },
+    { "name": "Sudoku",          "repo": "sudoku",          "genre": "puzzle",   "modules": ["core","render","input"],                       "size": "~18KB", "systems": 5, "batch": 1 },
+    { "name": "Sliding Puzzle",  "repo": "sliding-puzzle",  "genre": "puzzle",   "modules": ["core","grid","render","input"],                "size": "~14KB", "systems": 4, "batch": 1 },
+    { "name": "Minesweeper",     "repo": "minesweeper",     "genre": "puzzle",   "modules": ["core","grid","render","input"],                "size": "~17KB", "systems": 5, "batch": 1 },
+    { "name": "Wordle",          "repo": "wordle",          "genre": "puzzle",   "modules": ["core","render","input"],                       "size": "~16KB", "systems": 4, "batch": 1 },
+    { "name": "Sokoban",         "repo": "sokoban",         "genre": "puzzle",   "modules": ["core","grid","render","input"],                "size": "~16KB", "systems": 5, "batch": 2 },
+
+    { "name": "Snake",           "repo": "snake",           "genre": "arcade",   "modules": ["core","grid","render","input"],                "size": "17KB",  "systems": 4, "batch": 1 },
+    { "name": "Pong",            "repo": "pong",            "genre": "arcade",   "modules": ["core","render","input","ai"],                  "size": "~14KB", "systems": 4, "batch": 1 },
+    { "name": "Breakout",        "repo": "breakout",        "genre": "arcade",   "modules": ["core","grid","render","input"],                "size": "~18KB", "systems": 5, "batch": 1 },
+    { "name": "Flappy",          "repo": "flappy",          "genre": "arcade",   "modules": ["core","render","input"],                       "size": "~13KB", "systems": 3, "batch": 1 },
+    { "name": "Space Invaders",  "repo": "space-invaders",  "genre": "arcade",   "modules": ["core","grid","render","input"],                "size": "~19KB", "systems": 5, "batch": 1 },
+    { "name": "Whack-a-Mole",   "repo": "whack-a-mole",    "genre": "arcade",   "modules": ["core","render","input"],                       "size": "~12KB", "systems": 3, "batch": 1 },
+    { "name": "Simon",           "repo": "simon",           "genre": "arcade",   "modules": ["core","render","input"],                       "size": "~11KB", "systems": 3, "batch": 1 },
+    { "name": "Pac-Man",         "repo": "pac-man",         "genre": "arcade",   "modules": ["core","grid","render","input","ai"],            "size": "~20KB", "systems": 7, "batch": 2 },
+    { "name": "Frogger",         "repo": "frogger",         "genre": "arcade",   "modules": ["core","grid","render","input"],                "size": "~18KB", "systems": 6, "batch": 2 },
+
+    { "name": "Solitaire",      "repo": "solitaire",       "genre": "card",     "modules": ["core","render","input"],                       "size": "~20KB", "systems": 5, "batch": 1 },
+    { "name": "Blackjack",      "repo": "blackjack",       "genre": "card",     "modules": ["core","render","input","ai"],                  "size": "~16KB", "systems": 4, "batch": 1 },
+    { "name": "Poker",           "repo": "poker",           "genre": "card",     "modules": ["core","render","input","ai","cards","turns"],   "size": "~22KB", "systems": 7, "batch": 2 },
+
+    { "name": "Tower Defense",   "repo": "tower-defense",   "genre": "strategy", "modules": ["core","render","input"],                       "size": "~21KB", "systems": 6, "batch": 1 },
+    { "name": "Roguelike",       "repo": "roguelike",       "genre": "strategy", "modules": ["core","grid","render","input"],                "size": "~22KB", "systems": 7, "batch": 1 },
+    { "name": "Battleship",      "repo": "battleship",      "genre": "strategy", "modules": ["core","grid","render","input","ai"],            "size": "~19KB", "systems": 5, "batch": 1 },
+
+    { "name": "Match 3",         "repo": "match3",          "genre": "casual",   "modules": ["core","grid","render","input"],                "size": "~17KB", "systems": 5, "batch": 1 },
+    { "name": "Memory",          "repo": "memory",          "genre": "casual",   "modules": ["core","render","input"],                       "size": "~13KB", "systems": 4, "batch": 1 },
+    { "name": "Lights Out",      "repo": "lights-out",      "genre": "casual",   "modules": ["core","grid","render","input"],                "size": "~12KB", "systems": 3, "batch": 1 },
+    { "name": "Hangman",         "repo": "hangman",         "genre": "casual",   "modules": ["core","render","input"],                       "size": "~14KB", "systems": 3, "batch": 1 }
+  ]
+}
