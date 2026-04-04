@@ -40,6 +40,7 @@ const COMMANDS = {
   serve: () => import('../lib/serve.js'),
   info: () => import('../lib/info.js'),
   'title-card': () => import('../lib/title-card.js'),
+  'vision-diff': () => import('../lib/vision-diff/index.js'),
 };
 
 function printUsage() {
@@ -60,6 +61,10 @@ function printUsage() {
     info              Show project config and architecture diagram
     title-card        Generate title card image via Gemini AI (Nano Banana)
                       Use --gif <path> for enhanced mode with gameplay GIF compositing
+    vision-diff       Run vision-diff validation loop (reference → capture → compare → patch)
+                      --type <arcade|board|puzzle>  Game type (default: arcade)
+                      --iterations <n>              Max fix iterations (default: 3)
+                      --project <id>                Game Factory project ID
 
   Options:
     --factory <url>   Game Factory URL (default: http://localhost:3000)
