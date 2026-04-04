@@ -44,6 +44,7 @@ const COMMANDS = {
   'title-card': () => import('../lib/title-card.js'),
   'add-game': () => import('../lib/add-game.js'),
   sync: () => import('../lib/sync.js'),
+  'vision-diff': () => import('../lib/vision-diff/index.js'),
 };
 
 function printUsage() {
@@ -68,6 +69,10 @@ function printUsage() {
     sync              Propagate games.json → README, CLAUDE.md, build system
     sync --stats      Show game registry statistics
     sync --check      Verify files are in sync (for CI)
+    vision-diff       Run vision-diff validation loop (reference → capture → compare → patch)
+                      --type <arcade|board|puzzle>  Game type (default: arcade)
+                      --iterations <n>              Max fix iterations (default: 3)
+                      --project <id>                Game Factory project ID
 
   Options:
     --factory <url>   Game Factory URL (default: http://localhost:3000)
