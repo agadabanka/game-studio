@@ -15,6 +15,7 @@ chapters = [
     "ch07.pdf",
     "ch08.pdf",
     "ch09.pdf",
+    "ch10.pdf",
 ]
 
 writer = PdfWriter()
